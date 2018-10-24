@@ -1,0 +1,6 @@
+digraph tree {    "Node('/ v q → ')" [label=" v q → 
+dp=1"];    "Node('/ v q → /')" [label="
+dp=1"];    "Node('/ v q → /q → ')" [label="q → 
+dp=1"];    "Node('/ v q → /q → /~( v q )')" [label="~( v q )
+dp=1"];    "Node('/ v q → /q → /')" [label="
+dp=1"];    "Node('/ v q → ')" ->"Node('/ v q → /')";    "Node('/ v q → ')" ->"Node('/ v q → /q → ')";    "Node('/ v q → /q → ')" ->"Node('/ v q → /q → /~( v q )')";    "Node('/ v q → /q → ')" ->"Node('/ v q → /q → /')";}
