@@ -100,6 +100,8 @@ class formationTree():
     def removeDoubleNegation(self,formula):
         if sum([1 for j in formula if j.isalpha()])==1 and formula[0:3]=="~(~":
             formula=formula[3]
+        #elif sum([1 for j in formula if j.isalpha()])>=1 and formula[0:3]=="~(~":
+        #    formula=formula[4:-2]
         return formula
 
     def checkIfNegation(self,formula):
@@ -120,9 +122,15 @@ class formationTree():
                 subformula1=formula[0]
         if len(formula[i+1:-1])>1:
             subformula2=self.removeParenthesis(formula[i:])[1:-1]
+            if formula[i+2]=='~':
+                subformula2="~("+subformula2+")"
+                #print(subformula2)
         else:
             subformula2=formula[-1]
 
+        subformula1=self.removeDoubleNegation(subformula1)
+        subformula2=self.removeDoubleNegation(subformula2)
+        print(subformula2)
         return subformula1, subformula2
 
     def treeExtraction(self,formula,nodeList,parent):
