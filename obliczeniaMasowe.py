@@ -4,15 +4,16 @@ from sklearn.cross_decomposition import CCA
 import numpy as np
 
 def removeTrash(data):
-    data=data.replace("`I`","→").replace("`A`","ʌ").replace("`D`","v")
-    data=data.replace("N (V 1)","~p").replace("N (V 2)","~q").replace("N (V 3)","~r").replace("N (V 4)","~s")
-    data=data.replace("V 1","p").replace("V 2","q").replace("V 3","r").replace("V 4","s")
+    data=data.replace("`I`","→").replace("`A`","ʌ").replace("`D`","v").replace("`E`","≡")
+    data=data.replace("N (V 1)","~p").replace("N (V 2)","~q").replace("N (V 3)","~r").replace("N (V 4)","~s").replace("N (V 5)","~t").replace("N ","~")
+    data=data.replace("V 1","p").replace("V 2","q").replace("V 3","r").replace("V 4","s").replace("V 5", "t")
     return data
 
 
-filename="geo1.txt"
+filename="test (1).txt"
 with open(filename, 'r') as inputFile:
-    data = inputFile.read().splitlines(True)
+    dataFromFile = inputFile.read().splitlines(True)
+
 
 resultsDP=[]
 counter=1
@@ -21,19 +22,16 @@ print(oldCounter)
 n_components = 1
 n_dp=4
 resultsSorted=[]
-for i in data:
+for i in dataFromFile:
     dane=removeTrash(i)
     tree1=amelia.formationTree(dane)
     tree2=amelia.formationTree("~("+dane+")")
-    #treeToCmd=amelia_display.displayTree(tree1.giveMeTree())
-    #treeToCmd.drawTreeInCMDWithDp()
-    #treeToCmd=amelia_display.displayTree(tree2.giveMeTree())
-    #treeToCmd.drawTreeInCMDWithDp()
+
     measures=amelia_dp.measures(tree1,tree2)
     resultsDP.append(measures)
-    if int(100*counter/len(data))>oldCounter:
-        oldCounter=int(100*counter/len(data))
-        #os.system("cls")
+    if int(100*counter/len(dataFromFile))>oldCounter:
+        oldCounter=int(100*counter/len(dataFromFile))
+        os.system("cls")
         print(oldCounter)
     counter+=1
     n_var=len(amelia_dp.extractVariables(tree1.formulaWithCorrectSpaces))
@@ -46,8 +44,9 @@ for i in data:
 
     data.extend(data2)
     resultsSorted.append(data)
+
 resultsSorted=np.asarray(resultsSorted)
-#print(resultsSorted)
+print(resultsSorted)
 cca = CCA(n_components)
 d1=resultsSorted.T[:][:1].T
 d2=resultsSorted.T[:][-2:].T

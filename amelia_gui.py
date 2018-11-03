@@ -7,7 +7,7 @@ class AmeliaGUI (Frame , object ):
     def __init__(self, master):
         super(AmeliaGUI , self).__init__(master)
         self.master.title("Amelia GUI")
-        glowneOkno.geometry("1025x600")
+        glowneOkno.geometry("1350x650")
         #glowneOkno.state('zoomed')
         glowneOkno.resizable(0,0)
         self.pack(fill =BOTH , expand =1)
@@ -16,38 +16,43 @@ class AmeliaGUI (Frame , object ):
     def stworzWidgety(self):
         buttonWidth=17
         smallButtonWidth=5
+        shift=200
         przyciskSprawdzenie = Button(self, text = "Check formula", width=buttonWidth, command=self.checkFormula)
-        przyciskSprawdzenie.place(x=850, y=170)
+        przyciskSprawdzenie.place(x=850+shift, y=170)
         self.przyciskDrzewo = Button(self, text = "Generate tree", width=buttonWidth, state=DISABLED, command=lambda:self.generateTree(0))
-        self.przyciskDrzewo.place(x=700, y=170)
+        self.przyciskDrzewo.place(x=700+shift, y=170)
         self.przyciskDrzewoDF = Button(self, text = "Generate tree with df", width=buttonWidth, state=DISABLED, command=lambda:self.generateTree(1))
-        self.przyciskDrzewoDF.place(x=700, y=220)
+        self.przyciskDrzewoDF.place(x=700+shift, y=220)
         self.przyciskDrzewoOblDF = Button(self, text = "Compute df", width=buttonWidth, state=DISABLED, command=self.comupteDp)
-        self.przyciskDrzewoOblDF.place(x=850, y=220)
+        self.przyciskDrzewoOblDF.place(x=850+shift, y=220)
         self.przyciskDrzewoPic = Button(self, text = "Generate tree in PNG", width=buttonWidth, state=DISABLED, command=self.generateTreePNG)
-        self.przyciskDrzewoPic.place(x=700, y=270)
+        self.przyciskDrzewoPic.place(x=700+shift, y=270)
         self.przyciskDrzewoPrev = Button(self, text = "PNG preview", width=buttonWidth, state=DISABLED, command=self.imagePreview)
-        self.przyciskDrzewoPrev.place(x=850, y=270)
+        self.przyciskDrzewoPrev.place(x=850+shift, y=270)
         przyciskImplikacja = Button(self, text = "→", width=smallButtonWidth, command=self.insertImplication)
-        przyciskImplikacja.place(x=700, y=130)
+        przyciskImplikacja.place(x=700+shift, y=130)
         przyciskAlternatywa = Button(self, text = "v", width=smallButtonWidth, command=self.insertOR)
-        przyciskAlternatywa.place(x=770, y=130)
+        przyciskAlternatywa.place(x=770+shift, y=130)
         przyciskKoniunkcja = Button(self, text = "ʌ", width=smallButtonWidth, command=self.insertAND)
-        przyciskKoniunkcja.place(x=840, y=130)
+        przyciskKoniunkcja.place(x=840+shift, y=130)
         przyciskNegacja = Button(self, text = "~", width=smallButtonWidth, command=self.insertNOT)
-        przyciskNegacja.place(x=910, y=130)
+        przyciskNegacja.place(x=910+shift, y=130)
         opisPolaTekstowego=Label(self,text="Formula:")
-        opisPolaTekstowego.place(x=700, y=70)
+        opisPolaTekstowego.place(x=700+shift, y=70)
         self.oldText=StringVar()
         self.oldText.trace("w", self.textChanged)
         self.oldText.set("pvq→r")
         self.poleTekstowe = Entry (self, width=50,textvariable=self.oldText)
-        self.poleTekstowe.place(x=700, y=100)
-        self.tekst=Text(self, height=37, width=80)
+        self.poleTekstowe.place(x=700+shift, y=100)
+        self.tekst=Text(self, height=37, width=105)
         self.tekst.place(x=0, y=0)
         #self.poleTekstowe.insert(END, "pvq→r")
         self.tekstDF=Text(self, height=10, width=35)
-        self.tekstDF.place(x=700, y=325)
+        self.tekstDF.place(x=700+shift, y=325)
+        scrollbar = Scrollbar(self.tekst)
+        scrollbar.place(x=625+shift, height=595)
+        scrollbar.config(command=self.tekst.yview)
+        self.tekst.config(yscrollcommand=scrollbar.set)
 
     def textChanged(self,*args):
         self.przyciskDrzewo.config(state="disabled")
@@ -97,9 +102,15 @@ class AmeliaGUI (Frame , object ):
 
     def checkIfNegation(self, formula):
         if formula[0]=="~":
-            formula2=amelia.formationTree(formula[2:-1])
+            if formula.count('ʌ')+formula.count('v')+formula.count('→')==formula.count('('):
+                formula2=amelia.formationTree(formula[1:])
+            else:
+                formula2=amelia.formationTree(formula[2:-1])
         else:
-            formula2=amelia.formationTree("~("+formula+")")
+            if formula.count('ʌ')+formula.count('v')+formula.count('→')==formula.count('('):
+                formula2=amelia.formationTree("~"+formula)
+            else:
+                formula2=amelia.formationTree("~("+formula+")")
         return formula2
 
     def generateTreePNG(self):

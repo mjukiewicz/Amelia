@@ -21,6 +21,8 @@ def measures(formula1, formula2):
         values=[j[1] for j in dpValues[i]]
         valuesNeg=[j[1] for j in dpValues[i] if j[0][0]=='~']
         valuesWithoutNeg=[j[1] for j in dpValues[i] if not j[0][0]=='~']
+        if valuesNeg==[]:
+            valuesNeg=[0]
         results.append([variables[i],max(values),statistics.mean(values),statistics.median(values),(max(valuesNeg)+max(valuesWithoutNeg))/2])
 
     return results
@@ -67,7 +69,7 @@ def computeDpPoints(nodeList):
         negation, formulaParent=checkIfNegation(nodeList[i].parent.name)
         parentConjunction=conjunctionFind(formulaParent)
         parentWartosc=dpList[nodeList.index(nodeList[i].parent)]
-
+        
         if parentConjunction== 'ʌ' and negation:
             dpList.append(parentWartosc*1)
         elif parentConjunction== 'v' and negation or parentConjunction== '→' and negation:

@@ -1,4 +1,5 @@
 from anytree import Node
+from re import findall
 
 formula1='(p → q) → ((p → r) → (p → (q ʌ r)))'
 formula2='(((p v q) -> r) v s )-> ((s ʌ r) -> (p ->q))'
@@ -41,6 +42,8 @@ class formationTree():
                 rightParenthesis=formula.find(")",j)
                 if not any(char in formula[j:rightParenthesis] for char in ('(',')')):
                     formula=formula[:j+1]+'('+ formula[j+1:rightParenthesis]+')'+formula[rightParenthesis:]
+        for j in set("".join(findall("[a-zA-Z]+", formula))):
+            formula=formula.replace("("+j+")",j)
         return formula
 
     def spacesInFormula(self,formula):
@@ -51,6 +54,8 @@ class formationTree():
                 newFormula += ' ' + formula[i] + ' '
             else:
                 newFormula += formula[i]
+        if formula.count('ʌ')+formula.count('v')+formula.count('→')<=formula.count('(') and not formula[0]=='~':
+            newFormula=newFormula[1:-1]
         return newFormula
 #-----------
     def removeParenthesis(self,data):
@@ -106,7 +111,6 @@ class formationTree():
         return negation, formula
 
     def subFormulasExtraction(self,formula, i):
-
         if len(formula[1:i-1])>1:
             subformula1=self.removeParenthesis(formula[:i])[1:-1]
         else:
