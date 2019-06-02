@@ -11,14 +11,15 @@ formula6='~(((p v q) ʌ ((p ʌ r) →q)) -> ((r → s) → ((q v p) ʌ ((r v s) 
 class formationTree():
 
     def __init__(self, baseFormula):
-        self.checkFormulaCorrectness(baseFormula)
+        #self.checkFormulaCorrectness(baseFormula)
         formulaWithCorrectParenthesis=self.implicationAndParenthesis(baseFormula)
         self.formulaWithCorrectSpaces=self.spacesInFormula(formulaWithCorrectParenthesis)
+        self.formulaWithCorrectSpaces=self.removeDoubleNegation(self.formulaWithCorrectSpaces)
         self.nodeList= [Node(self.formulaWithCorrectSpaces)]
         self.treeExtraction(self.formulaWithCorrectSpaces, self.nodeList, self.nodeList[0])
 
     def checkFormulaCorrectness(self,formula):
-        spojniki=['ʌ','v','→']
+        spojniki=['ʌ','v','→','=']
         decision=False
         formula="".join(formula.split())
         for j in range(1,len(formula)):
@@ -50,16 +51,18 @@ class formationTree():
         formula="".join(formula.split())
         newFormula=''
         for i in range(len(formula)):
-            if formula[i] == 'ʌ' or formula[i] == 'v' or formula[i] == '→':
+            if formula[i] == 'ʌ' or formula[i] == 'v' or formula[i] == '→' or formula[i] == "=":
                 newFormula += ' ' + formula[i] + ' '
             else:
                 newFormula += formula[i]
-        if formula.count('ʌ')+formula.count('v')+formula.count('→')<=formula.count('(') and not formula[0]=='~':
+        if formula.count('=')+formula.count('ʌ')+formula.count('v')+formula.count('→')<=formula.count('(') and not formula[0]=='~':
             newFormula=newFormula[1:-1]
         return newFormula
 #-----------
     def removeParenthesis(self,data):
-        while True:
+        if data.count("(")==0 and data.count(")")==0:
+            data="("+data+")"
+        for i in range(max(data.count("("),data.count(")"))):
             if data.endswith(')') and data.startswith('('):
                 break
             elif not data.endswith(')'):
@@ -80,7 +83,6 @@ class formationTree():
             subformula1=subformula1.strip(' ')
         if len(subformula2) < 3:
             subformula2=subformula2.strip(' ')
-
         multiplier1=self.mySignFunction(len(subformula1))
         multiplier2=self.mySignFunction(len(subformula2))
 
@@ -88,24 +90,37 @@ class formationTree():
             subformula2 = "~" + "(" * multiplier2 + subformula2 + ")" * multiplier2
         elif conjunction == '→':
             subformula1 = "~" + "(" * multiplier1 + subformula1 + ")" * multiplier1
+        elif conjunction == "=" and negation:
+            temp2 = "~" + "(" * (multiplier2+1) + subformula2 + ")" * multiplier2 + " → " + "(" * multiplier1 + subformula1 + ")" * (multiplier1+1)
+            temp1 = "~" + "(" * (multiplier1+1) + subformula1 + ")" * multiplier1 + " → " + "(" * multiplier2 + subformula2 + ")" * (multiplier2+1)
+            subformula1=temp1
+            subformula2=temp2
+        elif conjunction == "=":
+            temp2 = "(" * multiplier2 + subformula2 + ")" * multiplier2 + " → " + "(" * multiplier1 + subformula1 + ")" * multiplier1
+            temp1 = "(" * multiplier1 + subformula1 + ")" * multiplier1 + " → " + "(" * multiplier2 + subformula2 + ")" * multiplier2
+            subformula1=temp1
+            subformula2=temp2
         elif negation:
             subformula2 = "~" + "(" * multiplier2 + subformula2 + ")" * multiplier2
             subformula1 = "~" + "(" * multiplier1 + subformula1 + ")" * multiplier1
 
         subformula1=self.removeDoubleNegation(subformula1)
         subformula2=self.removeDoubleNegation(subformula2)
-
         return subformula1, subformula2
 
     def removeDoubleNegation(self,formula):
-        if sum([1 for j in formula if j.isalpha()])==1 and formula[0:3]=="~(~":
+        n_conj=sum([1 for i in formula if i in ["→","ʌ","v","="]])
+        n_par=formula.count("(")
+        if n_conj==0 and formula[0:3]=="~(~":
             formula=formula[3]
-        elif sum([1 for j in formula if j.isalpha()])>=1 and formula[0:3]=="~(~":
+        elif n_conj<n_par and formula[0:3]=="~(~":
             formula=formula[4:-2]
         return formula
 
     def checkIfNegation(self,formula):
-        if formula[0]=='~' and formula[1]=='(':
+        n_par=formula.count("(")
+        n_conj=formula.count("→")+formula.count("ʌ")+formula.count("v")+formula.count("=")
+        if formula[0]=='~' and formula[1]=='(' and formula[-1]==')' and n_conj<=n_par:
             negation=True
             formula=formula[2:-1]
         else:
@@ -114,30 +129,34 @@ class formationTree():
 
     def subFormulasExtraction(self,formula, i):
         if len(formula[1:i-1])>1:
-            subformula1=self.removeParenthesis(formula[:i])[1:-1]
+            if formula[0:2]=="~("and formula[i-2]==')':
+                subformula1=formula[:i-1]
+            else:
+                subformula1=self.removeParenthesis(formula[:i])[1:-1]
         else:
             if formula[0]=='~':
                 subformula1="~"+formula[1]
             else:
                 subformula1=formula[0]
         if len(formula[i+1:-1])>1:
-            subformula2=self.removeParenthesis(formula[i:])[1:-1]
-            if formula[i+2]=='~':
-                subformula2="~("+subformula2+")"
-                #print(subformula2)
+            if formula[i+2:i+4]=='~(' and formula[-1]==')':
+                subformula2=formula[i+2:]
+            else:
+                subformula2=self.removeParenthesis(formula[i+2:])[1:-1]
+            #if formula[i+2]=='~':
+            #    subformula2="~("+subformula2+")"
+            #    print(subformula2)
         else:
             subformula2=formula[-1]
-
         subformula1=self.removeDoubleNegation(subformula1)
         subformula2=self.removeDoubleNegation(subformula2)
-        #print(subformula2)
         return subformula1, subformula2
 
     def treeExtraction(self,formula,nodeList,parent):
         negation, formula = self.checkIfNegation(formula)
         for i in range(len(formula)):
-            if formula[i]== '→' or formula[i]== 'v' or formula[i]=='ʌ':
-                if formula.count("(")==0 and formula.count(")")==0:
+            if formula[i]== '→' or formula[i]== 'v' or formula[i]=='ʌ' or formula[i]=='=':
+                if formula.count("(")==0 and formula.count(")")==0 and not formula[i]=='=':
                     subformula1, subformula2 = self.conjunctionRules(formula[i], formula[:i], formula[i+2:], negation)
                     self.nodeList.append(Node(subformula1, parent=nodeList[-1]))
                     self.nodeList.append(Node(subformula2, parent=nodeList[-2]))
@@ -150,6 +169,7 @@ class formationTree():
                     self.treeExtraction(subformula1,nodeList,leaf1)
                     self.nodeList.append(leaf2)
                     self.treeExtraction(subformula2,nodeList,leaf2)
+                    break
 
     def giveMeTree(self):
         return self.nodeList
