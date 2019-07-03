@@ -112,10 +112,11 @@ class formationTree():
         n_conj=sum([1 for i in formula if i in ["→","ʌ","v","="]])
         n_par=formula.count("(")
         if n_conj==0 and formula[0:3]=="~(~":
-            formula=formula[3]
+            return formula[3]
         elif n_conj<n_par and formula[0:3]=="~(~":
-            formula=formula[4:-2]
-        return formula
+            return formula[4:-2]
+        else:
+            return formula
 
     def checkIfNegation(self,formula):
         n_par=formula.count("(")

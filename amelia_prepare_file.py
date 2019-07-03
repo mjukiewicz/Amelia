@@ -16,9 +16,11 @@ def remove_parenthesis(formula):
     formula_str="".join(formula_list)
     formula_list = list(formula_str.replace(" ",""))
 
+    n_par=formula_str.count("(")
+    n_conj=sum([1 for i in formula_str if i in ["→","ʌ","v","="]])
     for j in range(formula.count("(")):
         for i in range(len(formula_list)):
-            if "".join(formula_list[i:i+4])=='~(~(' and "".join(formula_list[-2:])=='))':
+            if "".join(formula_list[i:i+4])=='~(~(' and "".join(formula_list[-2:])=='))' and n_conj<n_par:
                 formula_list[i:i+4]='    '
                 formula_list[-2:]='  '
         formula_list=list("".join(formula_list).replace(" ","").replace("~~",""))

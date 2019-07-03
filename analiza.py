@@ -16,7 +16,7 @@ def prepare_tree(input_data):
     tree=amelia_display.displayTree(formula.giveMeTree())
     tree.drawTreeInCMDWithDp()
     return formula
-
+'''
 with open('up_to_6.txt') as f:
     data_raw = f.read().splitlines()
 
@@ -33,8 +33,9 @@ for i in data_raw:
         formula_raw=i[0:i.find(",")]
         formulas_list.append(formula_raw)
         raw_lines.append(i)
-
-for i in range(len(raw_lines)):
+'''
+formulas_list=["~(p=q) & (p -> r)", "(p=q) & ~(p -> r)", "~(~(p=q) & (p -> r))", "~((p=q) & ~(p -> r))", "~(~(~(p=q) & (p -> r)))", "~(~(~(p=q) & ~p) -> r)", "~(~(~((p=q) & (p -> r))))", "~(~(~(~p=q) & ~p) -> r)", "~(~(~((~p=q) & (p -> r))))", "~(~(~(p v q) -> (p & r)))", "~(~(~(p v q) -> ~p) & r)", "~(~(~((p v q) -> (p & r))))"]
+for i in range(len(formulas_list)):
     #i=17644
     formula_raw=amelia_prepare_file.change_conj(formulas_list[i])
     formula_raw=amelia_prepare_file.remove_parenthesis(formula_raw)
@@ -51,7 +52,7 @@ for i in range(len(raw_lines)):
         dfMeasures=amelia_dp.measures(formula,formula_neg)
     dfMeasures=prepare_NaN_data(dfMeasures)
     print("\nrezultat:",formulas_list[i],i, dfMeasures,"\n****")
-    data_to_file.append(raw_lines[i]+","+dfMeasures)
+    #data_to_file.append(raw_lines[i]+","+dfMeasures)
 
 with open('up_to_6_większy.csv', 'w') as f:
     for item in data_to_file:
