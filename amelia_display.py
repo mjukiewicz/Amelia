@@ -37,3 +37,7 @@ class displayTree():
         dpListIterator=iter(amelia_dp.computeDpPoints(self.nodeList))
         for pre, _, node in RenderTree(self.nodeList[0]):
             print("%s%s dp=%g" % (pre, node.name, next(dpListIterator)))
+
+    def leaves(self):
+        leaves_tuple=self.nodeList[0].leaves
+        return [i.name for i in leaves_tuple]

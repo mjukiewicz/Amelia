@@ -28,17 +28,27 @@ def measures(formula1, formula2):
             #print(dpValues,values, valuesNeg, valuesWithoutNeg)
             measureD=(max(valuesNeg)+max(valuesWithoutNeg))/2
 
-        results.append([variables[i],max(values),statistics.mean(values),statistics.median(values),measureD])
+        scoreNP=1
+        for x in valuesNeg:
+            scoreNP*=x
+        scoreP=1
+        for x in valuesWithoutNeg:
+            scoreP*=x
+
+        scoreNS=sum([i for i in valuesNeg])
+        scoreS=sum([i for i in valuesWithoutNeg])
+
+        results.append([variables[i],max(values),statistics.mean(values),statistics.median(values), measureD, scoreS, scoreNS, scoreP, scoreNP])
 
     return results
 
 def createListOfDpValues(formula, variable, dpValues):
     dpValues.extend([i for i in formula if variable in i[0]])
     varsUsed=[k[0] for k in formula]
-    if not variable in varsUsed:           #zakomentowac jesli wersja bez zer
-        dpValues.append([variable,0])      #
-    elif not "~"+variable in varsUsed:     #
-        dpValues.append(["~"+variable,0])  #
+    # if not variable in varsUsed:           #zakomentowac jesli wersja bez zer
+    #     dpValues.append([variable,0])      #
+    # elif not "~"+variable in varsUsed:     #
+    #     dpValues.append(["~"+variable,0])  #
     return dpValues
 
 def listOfDpValues(formula):

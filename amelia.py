@@ -11,27 +11,13 @@ formula6='~(((p v q) ʌ ((p ʌ r) →q)) -> ((r → s) → ((q v p) ʌ ((r v s) 
 class formationTree():
 
     def __init__(self, baseFormula):
-        #self.checkFormulaCorrectness(baseFormula)
         formulaWithCorrectParenthesis=self.implicationAndParenthesis(baseFormula)
-        self.formulaWithCorrectSpaces=self.spacesInFormula(formulaWithCorrectParenthesis)
+        self.formulaWithCorrectSpaces=self.correctSpacesInFormula(formulaWithCorrectParenthesis)
+        #print(self.formulaWithCorrectSpaces)
         self.formulaWithCorrectSpaces=self.removeDoubleNegation(self.formulaWithCorrectSpaces)
+        #print(self.formulaWithCorrectSpaces)
         self.nodeList= [Node(self.formulaWithCorrectSpaces)]
         self.treeExtraction(self.formulaWithCorrectSpaces, self.nodeList, self.nodeList[0])
-
-    def checkFormulaCorrectness(self,formula):
-        spojniki=['ʌ','v','→','=']
-        decision=False
-        formula="".join(formula.split())
-        for j in range(1,len(formula)):
-            if formula[j]==formula[j-1] and formula[j]!='(' and formula[j]!=')':
-                decision=True
-            if formula[j] in spojniki and formula[j-1] in spojniki:
-                decision=True
-            if formula.count("(")!=formula.count(")"):
-                decision=True
-        if sum([1 for i in formula if i.isalpha() and i!='v']) <= sum([1 for i in formula if i in spojniki]):
-            decision=True
-        return decision #czemu to nie jest uzywane?
 
     def implicationAndParenthesis(self,formula):
         for j in range(len(formula)):
@@ -47,7 +33,7 @@ class formationTree():
             formula=formula.replace("("+j+")",j)
         return formula
 
-    def spacesInFormula(self,formula):
+    def correctSpacesInFormula(self,formula):
         formula="".join(formula.split())
         newFormula=''
         for i in range(len(formula)):
@@ -55,8 +41,6 @@ class formationTree():
                 newFormula += ' ' + formula[i] + ' '
             else:
                 newFormula += formula[i]
-        if formula.count('=')+formula.count('ʌ')+formula.count('v')+formula.count('→')<=formula.count('(') and not formula[0]=='~':
-            newFormula=newFormula[1:-1]
         return newFormula
 #-----------
     def removeParenthesis(self,data):
@@ -65,10 +49,6 @@ class formationTree():
         for i in range(max(data.count("("),data.count(")"))):
             if data.endswith(')') and data.startswith('('):
                 break
-            elif not data.endswith(')'):
-                data=data[:-1]
-            elif not data.startswith('('):
-                data=data[1:]
         return data
 
     def mySignFunction(self,number):
@@ -111,12 +91,12 @@ class formationTree():
     def removeDoubleNegation(self,formula):
         n_conj=sum([1 for i in formula if i in ["→","ʌ","v","="]])
         n_par=formula.count("(")
-        if n_conj==0 and formula[0:3]=="~(~":
-            return formula[3]
-        elif n_conj<n_par and formula[0:3]=="~(~":
-            return formula[4:-2]
-        else:
-            return formula
+        for i in range(int(formula.count("~")/2)): #slaby punkt
+            if n_conj==0 and formula[0:3]=="~(~":
+                formula=formula[3]
+            elif n_conj<n_par and formula[0:4]=="~(~(":
+                formula=formula[4:-2]
+        return formula
 
     def checkIfNegation(self,formula):
         n_par=formula.count("(")
@@ -133,7 +113,10 @@ class formationTree():
             if formula[0:2]=="~("and formula[i-2]==')':
                 subformula1=formula[:i-1]
             else:
-                subformula1=self.removeParenthesis(formula[:i])[1:-1]
+                if formula[0]=="(" and not formula[i-2]==")" or not formula[0]=="(" and formula[i-2]==")":
+                    subformula1=self.removeParenthesis(formula[:i])
+                else:
+                    subformula1=self.removeParenthesis(formula[:i])[1:-2]
         else:
             if formula[0]=='~':
                 subformula1="~"+formula[1]
@@ -143,10 +126,10 @@ class formationTree():
             if formula[i+2:i+4]=='~(' and formula[-1]==')':
                 subformula2=formula[i+2:]
             else:
-                subformula2=self.removeParenthesis(formula[i+2:])[1:-1]
-            #if formula[i+2]=='~':
-            #    subformula2="~("+subformula2+")"
-            #    print(subformula2)
+                if formula[i+2]=="(" and not formula[-1]==")" or not formula[i+2]=="(" and formula[-1]==")":
+                    subformula2=self.removeParenthesis(formula[i+2:])
+                else:
+                    subformula2=self.removeParenthesis(formula[i+2:])[1:-1]
         else:
             subformula2=formula[-1]
         subformula1=self.removeDoubleNegation(subformula1)
